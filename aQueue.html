@@ -1,0 +1,90 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>aQueue Test</title>
+	<style>
+		html, body {
+			height: 100%;
+			width: 100%;
+			background-color: green;
+		}
+		body {
+			background-color: red;
+		}
+		button {
+			height: 300px;
+			width: 300px;
+			font-size: 3em;
+			margin: 30px auto;
+			display: block;
+		}
+	</style>
+</head>
+<body>
+<button></button>
+</body>
+<script src=aQueue.js></script>
+<script>
+	(function(){
+		var task = function(a){
+				console.log(a);
+				},
+			queue = [function(a){
+				console.log(a);
+			},
+			function(){
+				console.log('2');
+			},
+			task,
+			function(){
+				var self = this;
+				console.log('4');
+				this.stop();
+				console.log('waiting for something to finish');
+				setTimeout(function(){
+					self.addTask(function(a){
+						console.log('this is added task via ' + a + '.addTask();')
+					})
+					self.process();
+				}, 300)
+			},function(){
+				console.log('5');
+			},{
+				function: function(a,b,c){
+					console.log(a,b,c);
+				},
+				arguments: ['6', 'function']
+				}],
+			arguments = ['aQueue'],
+			callback = function(){
+				console.log('done!');
+			};
+
+
+		for(var i = 0; i < 100; i++){
+			queue[queue.length] = (function(i){
+				return function(a){
+					document.body.style.opacity = ('.' + ((i < 10) ? '0' + i : i));
+					console.log('func call: ' + i + ' ' + a);
+					var it = 10000000;
+					while(it--){};
+
+					document.getElementsByTagName('button')[0].innerHTML = this.queueSize();
+				}
+			})(i);
+		}
+
+		var tasker = new aQueue(queue, arguments, callback, 100).process();
+
+		document.getElementsByTagName('button')[0].addEventListener('click', function(){
+			tasker.addTask(function(a){
+				console.log(a)
+			})
+		})
+
+
+
+
+	})();
+</script>
+</html>
