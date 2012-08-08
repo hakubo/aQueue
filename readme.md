@@ -29,7 +29,7 @@ in the begining of an array of arguments
  
 **callback** is a function to be called at the end of a queue
 
-** granularity** this is the time passed to setTimeout by default it is 25 ms
+**granularity** this is the time passed to setTimeout by default it is 25 ms
 
 **aQueue** supports chainability and offers this API:
 
