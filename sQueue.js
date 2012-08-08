@@ -66,6 +66,9 @@
 		},
 		queueSize: function(){
 			return this.queue.length;
+		},
+		isProcessing: function(){
+			return !!this.intervalProcess;
 		}
 	}
 

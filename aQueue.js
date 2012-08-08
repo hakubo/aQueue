@@ -1,10 +1,10 @@
 (function(w){
 	var aQueue = function(queue, arguments, callback, granularity){
-		this.queue = (queue instanceof Array) ? queue : false;
-		if(this.queue) {
+		if(this.queue = (queue instanceof Array) ? queue : false) {
 			this.arguments = arguments;
 			this.callback = (callback instanceof Function) ? callback : false;
 			this.granularity = granularity || 25;
+			this.intervalProcess = 0;
 		}else{
 			throw 'No queue specified';
 		}
@@ -14,12 +14,12 @@
 
 	aQueue.prototype = {
 		process: function(){
-			var self = this;
+			var self = this,
+				task;
 
 			self.intervalProcess = setTimeout(function(){
-				var task = self.queue.shift();
+				if(task = self.queue.shift()){
 
-				if(task){
 					self.intervalProcess = setTimeout(arguments.callee, self.granularity);
 
 					if(task instanceof Function){
@@ -29,19 +29,21 @@
 					}
 				}else{
 					self.callback && self.callback(self.arguments);
+					self.pause();
 				}
 
 			}, self.granularity);
 
 			return self;
 		},
-		stop: function(){
+		pause: function(){
 			clearTimeout(this.intervalProcess);
+			this.intervalProcess = 0;
 
 			return this;
 		},
 		addTask: function(task){
-			if(task instanceof Function){
+			if(task instanceof Function || (task instanceof Object && task.function && task.arguments)){
 				this.queue[this.queue.length] = task;
 			}else if(task instanceof Array){
 				this.queue.concat(task);
@@ -66,8 +68,11 @@
 			this.granularity = gran || 25;
 			return this;
 		},
-		queueSize: function(){
+		getQueueLength: function(){
 			return this.queue.length;
+		},
+		isProcessing: function(){
+			return !!this.intervalProcess;
 		}
 	}
 

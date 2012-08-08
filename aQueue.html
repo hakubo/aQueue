@@ -6,80 +6,91 @@
 		html, body {
 			height: 100%;
 			width: 100%;
-			background-color: green;
-		}
-		body {
-			background-color: red;
+			font-size: 2em;
 		}
 		button {
-			height: 300px;
+			height: 100px;
 			width: 300px;
-			font-size: 3em;
-			margin: 30px auto;
+			font-size: 1em;
+			margin: 100px auto;
 			display: block;
 		}
 	</style>
 </head>
 <body>
-<button></button>
+<button>Start</button>
+<button id="add"></button>
+<span id="size">Queue size: </span>
 </body>
 <script src=aQueue.js></script>
 <script>
 	(function(){
 		var task = function(a){
-				console.log(a);
+				console.log('This will be removed so wan\'t end up in a console');
 				},
-			queue = [function(a){
-				console.log(a);
-			},
-			function(){
-				console.log('2');
-			},
-			task,
-			function(){
-				var self = this;
-				console.log('4');
-				this.stop();
-				console.log('waiting for something to finish');
-				setTimeout(function(){
-					self.addTask(function(a){
-						console.log('this is added task via ' + a + '.addTask();')
-					})
-					self.process();
-				}, 300)
-			},function(){
-				console.log('5');
-			},{
-				function: function(a,b,c){
-					console.log(a,b,c);
-				},
-				arguments: ['6', 'function']
-				}],
+			queue = [
+				function(){
+					var self = this;
+					console.log('4');
+					this.pause();
+					console.log('waiting for something to finish');
+					setTimeout(function(){
+						self.addTask(function(a){
+							console.log('this is added task via ' + a + '.addTask();')
+						})
+						self.process();
+					}, 300)
+				},{
+					function: function(a,b,c){
+						console.log(a,b,c);
+					},
+					arguments: ['function', 'called']
+				}
+			],
 			arguments = ['aQueue'],
 			callback = function(){
-				console.log('done!');
-			};
-
-
-		for(var i = 0; i < 100; i++){
-			queue[queue.length] = (function(i){
-				return function(a){
-					document.body.style.opacity = ('.' + ((i < 10) ? '0' + i : i));
-					console.log('func call: ' + i + ' ' + a);
+				document.getElementsByTagName('button')[0].innerHTML = 'Done!';
+			},
+			buttonTask = function(a){
+					//something long/longish
 					var it = 10000000;
 					while(it--){};
 
-					document.getElementsByTagName('button')[0].innerHTML = this.queueSize();
-				}
-			})(i);
+					document.getElementsByTagName('button')[0].innerHTML = a;
+					document.getElementById('size').innerHTML = 'Queue size: ' + this.getQueueLength();
+			};
+
+
+		for(var i = 0; i < 10; i++){
+			queue[queue.length] = {
+				function: buttonTask,
+				arguments: [i]
+			};
 		}
 
-		var tasker = new aQueue(queue, arguments, callback, 100).process();
+		var tasker = new aQueue(queue, arguments, callback, 100).removeTask(task);
 
 		document.getElementsByTagName('button')[0].addEventListener('click', function(){
-			tasker.addTask(function(a){
-				console.log(a)
-			})
+			if(!tasker.isProcessing()){
+				tasker.addTask(
+					{
+						function: buttonTask,
+						arguments: [i++]
+					}
+				).process();
+			}else{
+				tasker.pause();
+			}
+		})
+
+		document.getElementById('add').addEventListener('click', function(){
+				tasker.addTask(
+						{
+							function: buttonTask,
+							arguments: [i++]
+						}
+				);
+			document.getElementById('size').innerHTML = 'Queue size: ' + tasker.getQueueLength();
 		})
 
 
